@@ -1,0 +1,29 @@
+{
+    "name": "scriptastic",
+    "version": "1.0.0",
+    "description": "Simple task runner.",
+    "main": "dist/index",
+    "types": "dist/index",
+    "scripts": {
+        "build": "tsc"
+    },
+    "author": "IT Team Polaris",
+    "license": "Unlicense",
+    "dependencies": {
+        "ansi-colors": "^3.2.1",
+        "moment": "^2.22.2",
+        "rimraf": "^2.6.2"
+    },
+    "devDependencies": {
+        "@types/rimraf": "^2.0.2",
+        "tslint": "^5.11.0",
+        "typescript": "^3.1.6"
+    },
+    "files": [
+        "dist",
+        "bin"
+    ],
+    "bin": {
+        "scri": "bin/scri"
+    }
+}
