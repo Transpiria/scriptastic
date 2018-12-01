@@ -1,6 +1,7 @@
 import chalk from "ansi-colors";
 import moment, { Moment } from "moment";
 import { BuildTask, BuildTaskWhen } from "./build-task";
+import { ErrorHelper } from "./error-helper";
 
 export class BuildTasks {
     public tasks: { [name: string]: BuildTask; } = {};
@@ -47,10 +48,12 @@ export class BuildTasks {
             }
 
             if (shouldRun) {
-                const start = moment();
-                console.info(`${this.FormatDisplayTime(start)} Starting '${chalk.cyan(task.Name)}'...`);
+                const runSuccess = await this.RunTasks(task.RunTasks);
+
                 if (task.DoesReference) {
+                    const start = moment();
                     try {
+                        console.info(`${this.FormatDisplayTime(start)} Starting '${chalk.cyan(task.Name)}'...`);
                         task.Result = await task.DoesReference();
                     } catch (error) {
                         task.Error = error;
@@ -62,24 +65,32 @@ export class BuildTasks {
                             }
                         }
                     }
+
+                    const end = moment();
+                    const elapsed = end.diff(start);
+                    let endLog = this.FormatDisplayTime(end);
+                    if (!task.Error) {
+                        endLog += ` Finished '${chalk.cyan(task.Name)}' `;
+                    } else {
+                        if (!process.exitCode || process.exitCode === 0) {
+                            process.exitCode = 1;
+                        }
+                        if (!task.ErrorReference) {
+                            console.error(ErrorHelper.prettifyError(task.Error));
+                        }
+                        endLog += ` '${chalk.cyan(task.Name)}' ${chalk.red("errored after ")}`;
+                    }
+                    endLog += this.FormatDisplayElapsed(elapsed);
+                    console.info(endLog);
                 }
 
-                const end = moment();
-                const elapsed = end.diff(start);
-                let endLog = this.FormatDisplayTime(end);
-                if (!task.Error) {
-                    endLog += ` Finished '${chalk.cyan(task.Name)}' `;
-                } else {
-                    if (!process.exitCode || process.exitCode === 0) {
-                        process.exitCode = 1;
-                    }
-                    if (!task.ErrorReference) {
-                        console.error(task.Error);
-                    }
-                    endLog += ` '${chalk.cyan(task.Name)}' ${chalk.red("errored after ")}`;
+                if (!runSuccess && !task.Error) {
+                    task.Error = new Error("One or more sub-tasks threw an error.");
                 }
-                endLog += this.FormatDisplayElapsed(elapsed);
-                console.info(endLog);
+            }
+
+            if (!dependencySuccess && !task.Error) {
+                task.Error = new Error("One or more dependent tasks threw an error.");
             }
         }
 

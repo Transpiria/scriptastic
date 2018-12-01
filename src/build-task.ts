@@ -1,9 +1,20 @@
 export class BuildTask {
+    private static AddTasks(taskCollection: string[], tasks: Array<string | BuildTask>) {
+        for (const task of tasks) {
+            const taskName = task instanceof BuildTask ? task.Name : task;
+            const taskIndex = taskName.toLowerCase();
+            if (taskCollection.indexOf(taskIndex) === -1) {
+                taskCollection.push(taskIndex);
+            }
+        }
+    }
+
     public readonly Name: string;
     public HasRun: boolean = false;
     public Result: any;
     public Successful?: boolean;
     public Dependencies: string[] = [];
+    public RunTasks: string[] = [];
     public Error: any;
     public WhenReference: BuildTaskWhen | WhenPredicate = BuildTaskWhen.SuccessfulDependencies;
     public DoesReference?: DoesDelegate;
@@ -18,16 +29,18 @@ export class BuildTask {
         return this;
     }
 
-    public IsDependentOn(taskName: string): BuildTask {
-        const taskIndex = taskName.toLowerCase();
-        if (this.Dependencies.indexOf(taskIndex) === -1) {
-            this.Dependencies.push(taskIndex);
-        }
+    public DependsOn(tasks: string | BuildTask | Array<string | BuildTask>): BuildTask {
+        BuildTask.AddTasks(this.Dependencies, tasks instanceof Array ? tasks : [tasks]);
         return this;
     }
 
     public Does(method: DoesDelegate): BuildTask {
         this.DoesReference = method;
+        return this;
+    }
+
+    public Runs(tasks: string | BuildTask | Array<string | BuildTask>): BuildTask {
+        BuildTask.AddTasks(this.RunTasks, tasks instanceof Array ? tasks : [tasks]);
         return this;
     }
 

@@ -4,6 +4,7 @@ import os from "os";
 import path from "path";
 import rimraf from "rimraf";
 import { scri } from "./build-tasks";
+import { ErrorHelper } from "./error-helper";
 
 function findLocalModulesPath(dirPath: string = process.cwd()): string | undefined {
     let resultPath: string | undefined;
@@ -17,6 +18,22 @@ function findLocalModulesPath(dirPath: string = process.cwd()): string | undefin
         dirPath = path.dirname(dirPath);
     }
     return resultPath;
+}
+
+async function laxyTsNode() {
+    try {
+        return await import("ts-node");
+    } catch (error) {
+        return undefined;
+    }
+}
+
+async function lazyTypescript() {
+    try {
+        return await import("typescript");
+    } catch (error) {
+        return undefined;
+    }
 }
 
 async function compile(fileNames: string[], outDir: string): Promise<void> {
@@ -67,26 +84,50 @@ async function run() {
 
     if (!hasRun) {
         const scriTsPath = path.join(process.cwd(), "scri.ts");
-        let scriJsPath = path.join(process.cwd(), "scri.js");
-
+        const scriJsPath = path.join(process.cwd(), "scri.js");
+        let scriPath: string | undefined;
         let tempPath: string | undefined;
-        if (!fs.existsSync(scriJsPath) && fs.existsSync(scriTsPath)) {
-            tempPath = fs.mkdtempSync(path.join(os.tmpdir(), "scriTemp"));
-            if (localModulesPath) {
-                // Hack to get around node not paying attention to NODE_PATH after entry
-                fs.symlinkSync(localModulesPath, path.join(tempPath, "node_modules"), "junction");
-            }
-
-            scriJsPath = path.join(tempPath, "scri.js");
-            await compile([scriTsPath], tempPath);
-        }
 
         if (fs.existsSync(scriJsPath)) {
-            await import(scriJsPath);
-            await scri.RunTask();
+            scriPath = scriJsPath;
+        } else if (fs.existsSync(scriTsPath)) {
+            const tsNode = await laxyTsNode();
+            if (tsNode) {
+                tsNode.register({
+                    compilerOptions: {
+                        esModuleInterop: true,
+                        module: "commonjs",
+                        noEmitOnError: true,
+                        target: "es2016",
+                    },
+                    skipIgnore: true,
+                    skipProject: true,
+                });
+                scriPath = scriTsPath;
+            } else {
+                const typescript = await lazyTypescript();
+                if (typescript) {
+                    tempPath = fs.mkdtempSync(path.join(os.tmpdir(), "scriTemp"));
+                    if (localModulesPath) {
+                        // Hack to get around node not paying attention to NODE_PATH after entry
+                        fs.symlinkSync(localModulesPath, path.join(tempPath, "node_modules"), "junction");
+                    }
+
+                    await compile([scriTsPath], tempPath);
+                    scriPath = path.join(tempPath, "scri.js");
+                } else {
+                    console.error(chalk.red("Failed to locate a suitable compiler for typescript file."));
+                    process.exitCode = 1;
+                }
+            }
         } else {
             console.error(chalk.red("Failed to locate a suitable scri file."));
             process.exitCode = 1;
+        }
+
+        if (scriPath && fs.existsSync(scriPath)) {
+            await import(scriPath);
+            await scri.RunTask();
         }
 
         if (tempPath) {
@@ -95,14 +136,10 @@ async function run() {
     }
 }
 
-function prettifyError(error: Error) {
-    return chalk.red(error.message) && error.stack;
-}
-
 run()
     .catch((reason) => {
-        if (reason as Error) {
-            console.error(prettifyError(reason));
+        if (reason instanceof Error) {
+            console.error(ErrorHelper.prettifyError(reason));
         } else {
             console.error(reason);
         }
