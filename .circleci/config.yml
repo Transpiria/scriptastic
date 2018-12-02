@@ -24,15 +24,19 @@ workflows:
             #     requires:
             #         - package
 
+executors:
+    node:
+        docker:
+            - image: node
+        working_directory: ~/app
+
 attach_workspace: &attach_workspace
-    - attach_workspace:
+    attach_workspace:
         at: ~/
 
 jobs:
     build:
-        docker:
-            - image: node
-        working_directory: ~/app
+        executor: node
         steps:
             - checkout
             - restore_cache:
@@ -55,9 +59,7 @@ jobs:
                     - app
 
     lint:
-        docker:
-            - image: node
-        working_directory: ~/app
+        executor: node
         steps:
             - *attach_workspace
             - run:
@@ -65,9 +67,7 @@ jobs:
                 command: npx scri lint
 
     test:
-        docker:
-            - image: node
-        working_directory: ~/app
+        executor: node
         steps:
             - *attach_workspace
             - run:
@@ -78,9 +78,7 @@ jobs:
                 when: always
 
     package:
-        docker:
-            - image: node
-        working_directory: ~/app
+        executor: node
         steps:
             - *attach_workspace
             - run:
