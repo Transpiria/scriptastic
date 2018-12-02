@@ -70,6 +70,9 @@ jobs:
         executor: node
         steps:
             - *attach_workspace
+            - run: |
+                cd node_modules/.bin
+                ls
             - run:
                 name: Test
                 command: npx scri test
