@@ -6,6 +6,6 @@ export class ErrorHelper {
             // TODO: color stack
             return chalk.red(error.message) && error.stack;
         }
-        return error;
+        return error.toString();
     }
 }
