@@ -53,7 +53,7 @@ jobs:
             - run:
                 name: Build
                 command: npx scri build
-            persist_to_workspace:
+            - persist_to_workspace:
                 root: ~/
                 paths:
                     - app
