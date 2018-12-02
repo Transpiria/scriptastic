@@ -73,6 +73,7 @@ jobs:
             - run: |
                 cd node_modules/.bin
                 ls
+                echo $PATH
             - run:
                 name: Test
                 command: npx scri test
