@@ -39,10 +39,10 @@ jobs:
         executor: node
         steps:
             - checkout
-            - restore_cache:
-                keys:
-                    - dependencies-{{ checksum "package-lock.json" }}
-                    - dependencies-
+            # - restore_cache:
+            #     keys:
+            #         - dependencies-{{ checksum "package-lock.json" }}
+            #         - dependencies-
             - run:
                 name: Install packages
                 command: npm install
