@@ -5,9 +5,12 @@
     "main": "dist/index",
     "types": "dist/index",
     "scripts": {
-        "build": "tsc"
+        "clean": "scri clean",
+        "build": "scri build",
+        "test": "scri test",
+        "pack": "scri pack"
     },
-    "author": "IT Team Polaris",
+    "author": "Transpiria",
     "license": "Unlicense",
     "dependencies": {
         "ansi-colors": "^3.2.1",
@@ -15,7 +18,15 @@
         "rimraf": "^2.6.2"
     },
     "devDependencies": {
+        "@types/chai": "^4.1.7",
+        "@types/istanbul": "^0.4.30",
+        "@types/mocha": "^5.2.5",
         "@types/rimraf": "^2.0.2",
+        "chai": "^4.2.0",
+        "istanbul": "^0.4.5",
+        "mocha": "^5.2.0",
+        "nyc": "^13.1.0",
+        "scriptastic": "^1.0.1",
         "ts-node": "^7.0.1",
         "tslint": "^5.11.0",
         "typescript": "^3.1.6"
@@ -26,5 +37,26 @@
     ],
     "bin": {
         "scri": "bin/scri"
+    },
+    "nyc": {
+        "include": [
+            "src"
+        ],
+        "exclude": [
+            "dist"
+        ],
+        "extension": [
+            ".ts"
+        ],
+        "require": [
+            "ts-node/register"
+        ],
+        "reporter": [
+            "text",
+            "html",
+            "lcov"
+        ],
+        "sourceMap": true,
+        "instrument": true
     }
 }
