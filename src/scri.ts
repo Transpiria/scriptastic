@@ -3,8 +3,8 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import rimraf from "rimraf";
-import { scri } from "./build-tasks";
-import { ErrorHelper } from "./error-helper";
+import { scri } from "./buildTasks";
+import { ErrorHelper } from "./errorHelper";
 
 function findLocalModulesPath(dirPath: string = process.cwd()): string | undefined {
     let resultPath: string | undefined;
@@ -127,7 +127,7 @@ async function run() {
 
         if (scriPath && fs.existsSync(scriPath)) {
             await import(scriPath);
-            await scri.RunTask();
+            await scri.runTask();
         }
 
         if (tempPath) {

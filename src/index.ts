@@ -1,2 +1,4 @@
-export * from "./build-task";
-export * from "./build-tasks";
+export * from "./buildTask";
+export * from "./buildTasks";
+export * from "./errorHelper";
+export * from "./processHelper";

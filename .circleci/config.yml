@@ -1,0 +1,90 @@
+version: 2.1
+
+workflows:
+    version: 2
+    workflow:
+        jobs:
+            - build
+            - lint:
+                requires:
+                    - build
+            - test:
+                requires:
+                    - build
+            - package:
+                requires:
+                    - build
+                    - lint
+                    - test
+                filters:
+                    branches:
+                        only: master
+
+            # - publish:
+            #     requires:
+            #         - package
+
+executors:
+    node:
+        docker:
+            - image: node
+        working_directory: ~/app
+
+attach_workspace: &attach_workspace
+    attach_workspace:
+        at: ~/
+
+jobs:
+    build:
+        executor: node
+        steps:
+            - checkout
+            - restore_cache:
+                keys:
+                    - dependencies-{{ checksum "package-lock.json" }}
+                    - dependencies-
+            - run:
+                name: Install packages
+                command: npm install
+            - save_cache:
+                paths:
+                    - node_modules
+                key: dependencies-{{ checksum "package-lock.json" }}
+            - run:
+                name: Build
+                command: npx scri build
+            - persist_to_workspace:
+                root: ~/
+                paths:
+                    - app
+
+    lint:
+        executor: node
+        steps:
+            - *attach_workspace
+            - run:
+                name: Lint
+                command: npx scri lint
+
+    test:
+        executor: node
+        environment:
+            TS_NODE_PROJECT: "test/tsconfig.json"
+        steps:
+            - *attach_workspace
+            - run:
+                name: Test
+                command: npx nyc mocha
+            - store_artifacts:
+                path: coverage/lcov.info
+                when: always
+
+    package:
+        executor: node
+        steps:
+            - *attach_workspace
+            - run:
+                name: Package extension
+                command: npx scri just-pack
+            - store_artifacts:
+                path: "*.tgz"

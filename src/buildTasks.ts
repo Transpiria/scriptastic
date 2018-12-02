@@ -1,14 +1,14 @@
 import chalk from "ansi-colors";
 import moment, { Moment } from "moment";
-import { BuildTask, BuildTaskWhen } from "./build-task";
-import { ErrorHelper } from "./error-helper";
+import { BuildTask, BuildTaskWhen } from "./buildTask";
+import { ErrorHelper } from "./errorHelper";
 
 export class BuildTasks {
-    public tasks: { [name: string]: BuildTask; } = {};
+    private tasks: { [name: string]: BuildTask; } = {};
 
-    public async RunTask(taskName?: string): Promise<BuildTask>;
-    public async RunTask(task: BuildTask): Promise<BuildTask>;
-    public async RunTask(taskOrName?: string | BuildTask): Promise<BuildTask> {
+    public async runTask(taskName?: string): Promise<BuildTask>;
+    public async runTask(task: BuildTask): Promise<BuildTask>;
+    public async runTask(taskOrName?: string | BuildTask): Promise<BuildTask> {
         let task: BuildTask;
         let taskName: string = taskOrName as string;
 
@@ -30,12 +30,12 @@ export class BuildTasks {
             }
         }
 
-        if (!task.HasRun) {
-            task.HasRun = true;
+        if (!task.hasRun) {
+            task.hasRun = true;
 
-            const dependencySuccess = await this.RunTasks(task.Dependencies);
+            const dependencySuccess = await this.runTasks(task.dependencies);
             let shouldRun = false;
-            switch (task.WhenReference) {
+            switch (task.whenReference) {
                 case BuildTaskWhen.Always:
                     shouldRun = true;
                     break;
@@ -43,67 +43,67 @@ export class BuildTasks {
                     shouldRun = dependencySuccess;
                     break;
                 default:
-                    shouldRun = task.WhenReference(task);
+                    shouldRun = task.whenReference(task);
                     break;
             }
 
             if (shouldRun) {
-                const runSuccess = await this.RunTasks(task.RunTasks);
+                const runSuccess = await this.runTasks(task.runTasks);
 
-                if (task.DoesReference) {
+                if (task.doesReference) {
                     const start = moment();
                     try {
-                        console.info(`${this.FormatDisplayTime(start)} Starting '${chalk.cyan(task.Name)}'...`);
-                        task.Result = await task.DoesReference();
+                        console.info(`${this.writeTime(start)} Starting '${chalk.cyan(task.name)}'...`);
+                        task.result = await task.doesReference();
                     } catch (error) {
-                        task.Error = error;
-                        if (task.ErrorReference) {
+                        task.error = error;
+                        if (task.errorReference) {
                             try {
-                                await task.ErrorReference(error);
+                                await task.errorReference(error);
                             } catch (error2) {
-                                task.Error = error2;
+                                task.error = error2;
                             }
                         }
                     }
 
                     const end = moment();
                     const elapsed = end.diff(start);
-                    let endLog = this.FormatDisplayTime(end);
-                    if (!task.Error) {
-                        endLog += ` Finished '${chalk.cyan(task.Name)}' `;
+                    let endLog = this.writeTime(end);
+                    if (!task.error) {
+                        endLog += ` Finished '${chalk.cyan(task.name)}' `;
                     } else {
                         if (!process.exitCode || process.exitCode === 0) {
                             process.exitCode = 1;
                         }
-                        if (!task.ErrorReference) {
-                            console.error(ErrorHelper.prettifyError(task.Error));
+                        if (!task.errorReference) {
+                            console.error(ErrorHelper.prettifyError(task.error));
                         }
-                        endLog += ` '${chalk.cyan(task.Name)}' ${chalk.red("errored after ")}`;
+                        endLog += ` '${chalk.cyan(task.name)}' ${chalk.red("errored after ")}`;
                     }
-                    endLog += this.FormatDisplayElapsed(elapsed);
+                    endLog += this.writeElapsed(elapsed);
                     console.info(endLog);
                 }
 
-                if (!runSuccess && !task.Error) {
-                    task.Error = new Error("One or more sub-tasks threw an error.");
+                if (!runSuccess && !task.error) {
+                    task.error = new Error("One or more sub-tasks threw an error.");
                 }
             }
 
-            if (!dependencySuccess && !task.Error) {
-                task.Error = new Error("One or more dependent tasks threw an error.");
+            if (!dependencySuccess && !task.error) {
+                task.error = new Error("One or more dependent tasks threw an error.");
             }
         }
 
         return task;
     }
 
-    public async RunTasks(taskNames: string[]): Promise<boolean> {
+    public async runTasks(taskNames: string[]): Promise<boolean> {
         let dependencyIndex = 0;
         let success = true;
         while (dependencyIndex < taskNames.length) {
             const dependency = taskNames[dependencyIndex];
-            const task = await this.RunTask(dependency);
-            if (task.Error) {
+            const task = await this.runTask(dependency);
+            if (task.error) {
                 success = false;
             }
             dependencyIndex++;
@@ -112,7 +112,7 @@ export class BuildTasks {
         return success;
     }
 
-    public Task(taskName: string): BuildTask {
+    public task(taskName: string): BuildTask {
         const taskIndex = taskName.toLowerCase();
         let task = this.tasks[taskIndex];
         if (!task) {
@@ -122,19 +122,19 @@ export class BuildTasks {
         return task;
     }
 
-    private FormatDisplayTime(time: Moment): string {
-        return `[${chalk.grey(this.FormatTime(time))}]`;
+    private writeTime(time: Moment): string {
+        return `[${chalk.grey(this.formatTime(time))}]`;
     }
 
-    private FormatTime(time: Moment): string {
+    private formatTime(time: Moment): string {
         return time.format("HH:mm:ss");
     }
 
-    private FormatDisplayElapsed(elapsed: number): string {
-        return chalk.magenta(this.FormatElapsed(elapsed));
+    private writeElapsed(elapsed: number): string {
+        return chalk.magenta(this.formatElapsed(elapsed));
     }
 
-    private FormatElapsed(elapsed: number): string {
+    private formatElapsed(elapsed: number): string {
         if (elapsed > 1100) {
             if (elapsed / 1000 > 66) {
                 return `${Math.round(elapsed / 50 / 3) / 100} m`;
