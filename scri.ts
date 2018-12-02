@@ -38,7 +38,6 @@ scri.Task("test")
     .DependsOn("clean:nyc")
     .DependsOn("clean:coverage")
     .Does(() => {
-        console.log(`PATH: ${process.env.PATH}`);
         ph.executeSync("nyc --all mocha", {
             env: {
                 TS_NODE_PROJECT: "test/tsconfig.json",
