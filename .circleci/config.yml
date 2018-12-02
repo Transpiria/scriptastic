@@ -30,7 +30,7 @@ executors:
             - image: node
         working_directory: ~/app
 
-attach_workspace: &attach_workspace:
+attach_workspace: &attach_workspace
     - attach_workspace:
         at: ~/
 
