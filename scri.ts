@@ -1,58 +1,57 @@
 import rimraf from "rimraf";
-import { scri } from "scriptastic";
-import { ProcessHelper as ph } from "./src/processHelper";
+import { ProcessHelper as ph, scri } from "scriptastic";
 
-scri.Task("clean:dist")
-    .Does(() => {
+scri.task("clean:dist")
+    .does(() => {
         rimraf.sync("dist/**/*");
     });
 
-scri.Task("clean:nyc")
-    .Does(() => {
+scri.task("clean:nyc")
+    .does(() => {
         rimraf.sync(".nyc_output");
     });
 
-scri.Task("clean:coverage")
-    .Does(() => {
+scri.task("clean:coverage")
+    .does(() => {
         rimraf.sync("coverage");
     });
 
-scri.Task("clean")
-    .DependsOn("clean:dist")
-    .DependsOn("clean:nyc")
-    .DependsOn("clean:coverage");
+scri.task("clean")
+    .dependsOn("clean:dist")
+    .dependsOn("clean:nyc")
+    .dependsOn("clean:coverage");
 
-scri.Task("lint")
-    .Does(() => {
+scri.task("lint")
+    .does(() => {
         ph.executeSync("tslint --project .");
     })
-    .OnError(() => undefined);
+    .onError(() => undefined);
 
-scri.Task("build")
-    .DependsOn("clean:dist")
-    .Does(() => {
+scri.task("build")
+    .dependsOn("clean:dist")
+    .does(() => {
         ph.executeSync("tsc --project .");
     });
 
-scri.Task("test")
-    .DependsOn("clean:nyc")
-    .DependsOn("clean:coverage")
-    .Does(() => {
+scri.task("test")
+    .dependsOn("clean:nyc")
+    .dependsOn("clean:coverage")
+    .does(() => {
         ph.executeSync("nyc --all mocha", {
             env: {
                 TS_NODE_PROJECT: "test/tsconfig.json",
             },
         });
     })
-    .OnError(() => undefined);
+    .onError(() => undefined);
 
-scri.Task("just-pack")
-    .Does(() => {
+scri.task("just-pack")
+    .does(() => {
         ph.executeSync("npm pack");
     });
 
-scri.Task("pack")
-    .DependsOn("lint")
-    .DependsOn("build")
-    .DependsOn("test")
-    .Runs("just-pack");
+scri.task("pack")
+    .dependsOn("lint")
+    .dependsOn("build")
+    .dependsOn("test")
+    .runs("just-pack");

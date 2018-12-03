@@ -79,7 +79,11 @@ async function run() {
                 console.warn(chalk.yellow("The scri package should be installed locally to prevent build inconsistencies between environments."));
             }
         }
-        process.env.PATH = `${path.join(localModulesPath, ".bin")}${path.delimiter}${process.env.PATH}`;
+
+        const localPath = `${path.join(localModulesPath, ".bin")}${path.delimiter}`;
+        if (!process.env.PATH || !process.env.PATH.startsWith(localPath)) {
+            process.env.PATH = `${localPath}${process.env.PATH}`;
+        }
     }
 
     if (!hasRun) {

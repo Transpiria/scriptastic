@@ -1,16 +1,22 @@
 import { expect } from "chai";
 import cp from "child_process";
 import "mocha";
+import sinon from "sinon";
 import { ProcessHelper } from "../src/processHelper";
-
-// tslint:disable:no-string-literal
-// tslint:disable:no-unnecessary-initializer
-// tslint:disable:no-unused-expression
-// tslint:disable:variable-name
 
 describe("The ProcessHelper class", () => {
 
     describe("The executeSync method", () => {
+
+        let execSyncMock: sinon.SinonStub;
+
+        beforeEach(() => {
+            execSyncMock = sinon.stub(cp, "execSync");
+        });
+
+        afterEach(() => {
+            execSyncMock.restore();
+        });
 
         [
             { title: "command", options: undefined },
@@ -19,23 +25,13 @@ describe("The ProcessHelper class", () => {
             it(`should exec command (${title})`, () => {
                 // Arrange
                 const command = "command";
-                const result = "result";
-
-                let actualCommand: any = undefined;
-                let actualOptions: any = undefined;
-
-                cp["execSync"] = ((p1: string, p2?: any): string => {
-                    actualCommand = p1;
-                    actualOptions = p2;
-                    return result;
-                }) as any;
 
                 // Act
                 ProcessHelper.executeSync(command, options);
 
                 // Assert
-                expect(actualCommand).to.equal(command);
-                expect(actualOptions).to.not.be.undefined;
+                expect(execSyncMock.getCall(0).args[0]).to.equal(command);
+                expect(execSyncMock.getCall(0).args[1]).to.not.be.undefined;
             });
 
         });
@@ -48,20 +44,12 @@ describe("The ProcessHelper class", () => {
             it(`should default stdio (${title})`, () => {
                 // Arrange
                 const command = "command";
-                const result = "result";
-
-                let actualOptions: any = undefined;
-
-                cp["execSync"] = (_p1: any, p2?: any): any => {
-                    actualOptions = p2;
-                    return result;
-                };
 
                 // Act
                 ProcessHelper.executeSync(command, options as any);
 
                 // Assert
-                expect(actualOptions.stdio).to.equal(expectedStdio);
+                expect(execSyncMock.getCall(0).args[1].stdio).to.equal(expectedStdio);
             });
 
         });
