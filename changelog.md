@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.2] - 2018-11-30
+## [1.0.3] - 2018-11-02
 ### Added
 - Added ts-node as the primary option for live typescript compiling. [@tasadar2](https://github.com/tasadar2)
 - Added support for arrays of dependencies and run actions. [@tasadar2](https://github.com/tasadar2)
