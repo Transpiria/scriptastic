@@ -2,8 +2,6 @@ import { expect } from "chai";
 import "mocha";
 import { BuildTask, BuildTasks, ErrorHelper, scri } from "../src/index";
 
-// tslint:disable:no-unused-expression
-
 describe("The index module", () => {
 
     [
