@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [next] - next
+### Changed
+- Only prepending local bin path if path doesn't already begin with local bin path. [@tasadar2](https://github.com/tasadar2)
+
 ## [1.0.3] - 2018-11-02
 ### Added
 - Added ts-node as the primary option for live typescript compiling. [@tasadar2](https://github.com/tasadar2)
