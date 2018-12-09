@@ -60,9 +60,6 @@ export class BuildTasks {
                         if (!process.exitCode || process.exitCode === 0) {
                             process.exitCode = 1;
                         }
-                        if (!task.errorReference) {
-                            console.error(ErrorHelper.prettifyError(task.error));
-                        }
                         endLog += ` '${chalk.cyan(task.name)}' ${chalk.red("errored after ")}`;
                     }
                     endLog += this.writeElapsed(elapsed);
