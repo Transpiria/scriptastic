@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [next] - next
+## [1.0.5] - 2018-12-09
 ### Added
 - Added some method documentation. [@tasadar2](https://github.com/tasadar2)
 
