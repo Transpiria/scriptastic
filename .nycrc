@@ -16,6 +16,7 @@
         "html",
         "lcov"
     ],
+    "all": true,
     "sourceMap": true,
     "instrument": true
 }

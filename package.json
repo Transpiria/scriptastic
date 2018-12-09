@@ -38,9 +38,10 @@
         "typescript": "^3.1.6"
     },
     "files": [
-        "dist"
+        "dist",
+        "bin"
     ],
     "bin": {
-        "scri": "dist/scri.js"
+        "scri": "bin/scri"
     }
 }
