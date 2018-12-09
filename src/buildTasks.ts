@@ -1,32 +1,20 @@
 import chalk from "ansi-colors";
 import moment, { Moment } from "moment";
 import { BuildTask, BuildTaskWhen } from "./buildTask";
-import { ErrorHelper } from "./errorHelper";
 
 export class BuildTasks {
     private tasks: { [name: string]: BuildTask; } = {};
 
-    public async runTask(taskName?: string): Promise<BuildTask>;
-    public async runTask(task: BuildTask): Promise<BuildTask>;
-    public async runTask(taskOrName?: string | BuildTask): Promise<BuildTask> {
-        let task: BuildTask;
-        let taskName: string = taskOrName as string;
-
-        if (!taskOrName) {
-            taskName = process.argv.length > 2 ?
-                process.argv[2] :
-                "default";
-        }
-
-        if (taskName) {
+    /**
+     * Runs a task.
+     * @param task The task to run.
+     */
+    public async runTask(task: string | BuildTask = "default"): Promise<BuildTask> {
+        if (typeof task === "string") {
+            const taskName = task;
             task = this.tasks[taskName.toLowerCase()];
             if (!task) {
                 throw new Error(chalk.red(`Task '${chalk.cyan(taskName)}' was not defined.`));
-            }
-        } else {
-            task = taskOrName as BuildTask;
-            if (!task) {
-                throw new Error(chalk.red(`Task is invalid.`));
             }
         }
 
@@ -75,9 +63,6 @@ export class BuildTasks {
                         if (!process.exitCode || process.exitCode === 0) {
                             process.exitCode = 1;
                         }
-                        if (!task.errorReference) {
-                            console.error(ErrorHelper.prettifyError(task.error));
-                        }
                         endLog += ` '${chalk.cyan(task.name)}' ${chalk.red("errored after ")}`;
                     }
                     endLog += this.writeElapsed(elapsed);
@@ -97,6 +82,11 @@ export class BuildTasks {
         return task;
     }
 
+    /**
+     * Runs a set of tasks.
+     * @param taskNames Tasks to run.
+     * @returns Whether the tasks run were successful.
+     */
     public async runTasks(taskNames: string[]): Promise<boolean> {
         let dependencyIndex = 0;
         let success = true;
@@ -112,6 +102,10 @@ export class BuildTasks {
         return success;
     }
 
+    /**
+     * Creates a runnable task.
+     * @param taskName The name of the task.
+     */
     public task(taskName: string): BuildTask {
         const taskIndex = taskName.toLowerCase();
         let task = this.tasks[taskIndex];

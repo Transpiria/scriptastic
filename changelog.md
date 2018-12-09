@@ -3,9 +3,13 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [next] - next
+## [1.0.5] - 2018-12-09
+### Added
+- Added some method documentation. [@tasadar2](https://github.com/tasadar2)
+
 ### Changed
 - Only prepending local bin path if path doesn't already begin with local bin path. [@tasadar2](https://github.com/tasadar2)
+- No longer defaulting to writing out a tasks error. [@tasadar2](https://github.com/tasadar2)
 
 ## [1.0.3] - 2018-11-02
 ### Added

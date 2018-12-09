@@ -24,8 +24,7 @@ scri.task("clean")
 scri.task("lint")
     .does(() => {
         ph.executeSync("tslint --project .");
-    })
-    .onError(() => undefined);
+    });
 
 scri.task("build")
     .dependsOn("clean:dist")
@@ -42,8 +41,7 @@ scri.task("test")
                 TS_NODE_PROJECT: "test/tsconfig.json",
             },
         });
-    })
-    .onError(() => undefined);
+    });
 
 scri.task("just-pack")
     .does(() => {
