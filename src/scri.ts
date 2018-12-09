@@ -6,6 +6,16 @@ import rimraf from "rimraf";
 import { scri } from "./buildTasks";
 import { ErrorHelper } from "./errorHelper";
 
+interface IScriOptions {
+    entryTask: string;
+}
+
+function parseOptions(): IScriOptions {
+    return {
+        entryTask: process.argv[2],
+    };
+}
+
 function findLocalModulesPath(dirPath: string = process.cwd()): string | undefined {
     let resultPath: string | undefined;
     let prevPath = "";
@@ -87,6 +97,7 @@ async function run() {
     }
 
     if (!hasRun) {
+        const options = parseOptions();
         const scriTsPath = path.join(process.cwd(), "scri.ts");
         const scriJsPath = path.join(process.cwd(), "scri.js");
         let scriPath: string | undefined;
@@ -131,7 +142,7 @@ async function run() {
 
         if (scriPath && fs.existsSync(scriPath)) {
             await import(scriPath);
-            await scri.runTask();
+            await scri.runTask(options.entryTask);
         }
 
         if (tempPath) {

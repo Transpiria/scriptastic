@@ -6,27 +6,12 @@ import { ErrorHelper } from "./errorHelper";
 export class BuildTasks {
     private tasks: { [name: string]: BuildTask; } = {};
 
-    public async runTask(taskName?: string): Promise<BuildTask>;
-    public async runTask(task: BuildTask): Promise<BuildTask>;
-    public async runTask(taskOrName?: string | BuildTask): Promise<BuildTask> {
-        let task: BuildTask;
-        let taskName: string = taskOrName as string;
-
-        if (!taskOrName) {
-            taskName = process.argv.length > 2 ?
-                process.argv[2] :
-                "default";
-        }
-
-        if (taskName) {
+    public async runTask(task: string | BuildTask = "default"): Promise<BuildTask> {
+        if (typeof task === "string") {
+            const taskName = task;
             task = this.tasks[taskName.toLowerCase()];
             if (!task) {
                 throw new Error(chalk.red(`Task '${chalk.cyan(taskName)}' was not defined.`));
-            }
-        } else {
-            task = taskOrName as BuildTask;
-            if (!task) {
-                throw new Error(chalk.red(`Task is invalid.`));
             }
         }
 
