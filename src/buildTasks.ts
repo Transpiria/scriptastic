@@ -1,11 +1,14 @@
 import chalk from "ansi-colors";
 import moment, { Moment } from "moment";
 import { BuildTask, BuildTaskWhen } from "./buildTask";
-import { ErrorHelper } from "./errorHelper";
 
 export class BuildTasks {
     private tasks: { [name: string]: BuildTask; } = {};
 
+    /**
+     * Runs a task.
+     * @param task The task to run.
+     */
     public async runTask(task: string | BuildTask = "default"): Promise<BuildTask> {
         if (typeof task === "string") {
             const taskName = task;
@@ -79,6 +82,11 @@ export class BuildTasks {
         return task;
     }
 
+    /**
+     * Runs a set of tasks.
+     * @param taskNames Tasks to run.
+     * @returns Whether the tasks run were successful.
+     */
     public async runTasks(taskNames: string[]): Promise<boolean> {
         let dependencyIndex = 0;
         let success = true;
@@ -94,6 +102,10 @@ export class BuildTasks {
         return success;
     }
 
+    /**
+     * Creates a runnable task.
+     * @param taskName The name of the task.
+     */
     public task(taskName: string): BuildTask {
         const taskIndex = taskName.toLowerCase();
         let task = this.tasks[taskIndex];
