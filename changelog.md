@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2019-01-12
+### Added
+- Added some readme documentation. [@tasadar2](https://github.com/tasadar2)
+- Added error type to error text. [@tasadar2](https://github.com/tasadar2)
+- Added sample script. [@tasadar2](https://github.com/tasadar2)
+
+### Techdebt
+- Wrapped typescript loaders into common interfaces. [@tasadar2](https://github.com/tasadar2)
+- Arguments are only parsed from cli. [@tasadar2](https://github.com/tasadar2)
+
 ## [1.0.5] - 2018-12-09
 ### Added
 - Added some method documentation. [@tasadar2](https://github.com/tasadar2)

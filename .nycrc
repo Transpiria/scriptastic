@@ -3,7 +3,8 @@
         "src"
     ],
     "exclude": [
-        "dist"
+        "dist",
+        "samples"
     ],
     "extension": [
         ".ts"
