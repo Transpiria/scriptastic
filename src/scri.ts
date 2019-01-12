@@ -1,15 +1,17 @@
 import chalk from "ansi-colors";
 import fs from "fs";
-import os from "os";
 import path from "path";
-import rimraf from "rimraf";
 import { scri } from "./buildTasks";
 import { ErrorHelper } from "./errorHelper";
+import { loaders } from "./loaders";
+import { ILoader } from "./loaders/iloader";
+import { ILoaderResult } from "./loaders/iloaderResult";
 
 interface IScriOptions {
     entryTask: string;
 }
 
+// TODO: Add more cli options, and potentially a .rc for convenience
 function parseOptions(): IScriOptions {
     return {
         entryTask: process.argv[2],
@@ -30,51 +32,19 @@ function findLocalModulesPath(dirPath: string = process.cwd()): string | undefin
     return resultPath;
 }
 
-async function laxyTsNode() {
-    try {
-        return await import("ts-node");
-    } catch (error) {
-        return undefined;
+const loadTs: ILoader = async (scriptPath: string, options: any = {}): Promise<ILoaderResult> => {
+    let loaderResult: ILoaderResult | undefined;
+    let loaderIndex = 0;
+    while ((!loaderResult || !loaderResult.success) && loaderIndex < loaders.length) {
+        // TODO: fill options from tsconfig.json
+        loaderResult = await loaders[loaderIndex](scriptPath, options);
+        loaderIndex++;
     }
-}
 
-async function lazyTypescript() {
-    try {
-        return await import("typescript");
-    } catch (error) {
-        return undefined;
-    }
-}
-
-async function compile(fileNames: string[], outDir: string): Promise<void> {
-    const tsc = await import("typescript");
-    if (tsc) {
-        const program = tsc.createProgram(fileNames, {
-            esModuleInterop: true,
-            module: tsc.ModuleKind.CommonJS,
-            noEmitOnError: true,
-            outDir,
-            target: tsc.ScriptTarget.ES2016,
-        });
-        const emitResult = program.emit();
-
-        const allDiagnostics = tsc
-            .getPreEmitDiagnostics(program)
-            .concat(emitResult.diagnostics);
-
-        allDiagnostics.forEach((diagnostic) => {
-            if (diagnostic.file) {
-                const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!);
-                const message = tsc.flattenDiagnosticMessageText(diagnostic.messageText, "\n");
-                console.error(`${chalk.cyan(diagnostic.file.fileName)}${chalk.yellow(`:${line + 1}:${character + 1}`)} - ${chalk.red("error")} ${chalk.grey(`${diagnostic.code}:`)} ${message}`);
-            } else {
-                console.error(`${tsc.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`);
-            }
-        });
-    } else {
-        console.error(chalk.red("The typescript package is required in order to build scri.ts"));
-    }
-}
+    return loaderResult || {
+        success: false,
+    };
+};
 
 async function run() {
     const localModulesPath = findLocalModulesPath();
@@ -86,7 +56,7 @@ async function run() {
                 hasRun = true;
                 await import(path.join(localScri, "scri.js"));
             } else {
-                console.warn(chalk.yellow("The scri package should be installed locally to prevent build inconsistencies between environments."));
+                console.warn(chalk.yellow("WARNING: The scri package should be installed locally to prevent build inconsistencies between environments."));
             }
         }
 
@@ -101,39 +71,19 @@ async function run() {
         const scriTsPath = path.join(process.cwd(), "scri.ts");
         const scriJsPath = path.join(process.cwd(), "scri.js");
         let scriPath: string | undefined;
-        let tempPath: string | undefined;
+        let loaderResult: ILoaderResult | undefined;
 
         if (fs.existsSync(scriJsPath)) {
             scriPath = scriJsPath;
         } else if (fs.existsSync(scriTsPath)) {
-            const tsNode = await laxyTsNode();
-            if (tsNode) {
-                tsNode.register({
-                    compilerOptions: {
-                        esModuleInterop: true,
-                        module: "commonjs",
-                        noEmitOnError: true,
-                        target: "es2016",
-                    },
-                    skipIgnore: true,
-                    skipProject: true,
-                });
-                scriPath = scriTsPath;
-            } else {
-                const typescript = await lazyTypescript();
-                if (typescript) {
-                    tempPath = fs.mkdtempSync(path.join(os.tmpdir(), "scriTemp"));
-                    if (localModulesPath) {
-                        // Hack to get around node not paying attention to NODE_PATH after entry
-                        fs.symlinkSync(localModulesPath, path.join(tempPath, "node_modules"), "junction");
-                    }
+            loaderResult = await loadTs(scriTsPath, {
+                localModulesPath,
+            });
+            scriPath = loaderResult.scriptPath;
 
-                    await compile([scriTsPath], tempPath);
-                    scriPath = path.join(tempPath, "scri.js");
-                } else {
-                    console.error(chalk.red("Failed to locate a suitable compiler for typescript file."));
-                    process.exitCode = 1;
-                }
+            if (!loaderResult.success) {
+                console.error(chalk.red("ERROR: Failed to locate a suitable compiler for typescript file."));
+                process.exitCode = 1;
             }
         } else {
             console.error(chalk.red("Failed to locate a suitable scri file."));
@@ -145,8 +95,8 @@ async function run() {
             await scri.runTask(options.entryTask);
         }
 
-        if (tempPath) {
-            rimraf.sync(tempPath);
+        if (loaderResult && loaderResult.dispose) {
+            loaderResult.dispose();
         }
     }
 }
