@@ -82,7 +82,12 @@ Tasks are the core of the build system. Tasks can be as granular as needed.
 
 This will create a task named `clean`.
 
-[samples/simple.flow.ts#L3-L6](samples/simple.flow.ts#L3-L6)
+```ts
+scri.task("clean")
+    .does(() => {
+        console.log("Build artifacts are removed");
+    });
+```
 
 #### Add a dependency for a task
 
@@ -90,7 +95,13 @@ Dependencies are run before the current task. By default, the task will only run
 
 This will create a task named `build` with a dependency on the `clean` task.
 
-[samples/simple.flow.ts#L8-L12](samples/simple.flow.ts#L8-L12)
+```ts
+scri.task("build")
+    .dependsOn("clean")
+    .does(() => {
+        console.log("Project is built");
+    });
+```
 
 ## Why should I use this build system?
 
