@@ -15,6 +15,7 @@ workflows:
                 requires:
                     - build
             - publish:
+                context: npm-transpiria
                 requires:
                     - build
                     - lint
@@ -66,7 +67,7 @@ jobs:
             - attach_workspace_step
             - run:
                 name: Test
-                command: npx nyc -- mocha --require ts-node/register --recursive test/**/*.spec.*
+                command: npx nyc -- mocha --require ts-node/register "test/**/*.spec.*"
 
     publish:
         executor: node

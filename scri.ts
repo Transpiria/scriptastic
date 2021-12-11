@@ -36,7 +36,7 @@ scri.task("test")
     .dependsOn("clean:nyc")
     .dependsOn("clean:coverage")
     .does(() => {
-        ph.executeSync("nyc _mocha --require ts-node/register --recursive test/**/*.spec.*", {
+        ph.executeSync(`nyc _mocha --require ts-node/register "test/**/*.spec.*"`, {
             env: {
                 TS_NODE_PROJECT: "test/tsconfig.json",
             },
