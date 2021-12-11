@@ -31,9 +31,13 @@ export class BuildTask {
     /**
      * Creates a new task.
      * @param name The name of the task.
+     * @param does Sets what the task does.
      */
-    constructor(name: string) {
+    constructor(name: string, does?: DoesDelegate) {
         this.name = name;
+        if (does) {
+            this.does(does);
+        }
     }
 
     /**

@@ -2,11 +2,9 @@
     "compilerOptions": {
         "target": "es5",
         "lib": [
-            "es2015",
+            "esnext",
         ],
         "declaration": true,
-        "declarationMap": true,
-        "sourceMap": true,
         "outDir": "dist",
         "strict": true,
         "noImplicitAny": true,
@@ -21,7 +19,8 @@
         "skipLibCheck": true,
         "preserveConstEnums": true,
         "newLine": "lf",
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "importHelpers": true
     },
     "include": [
         "src"

@@ -74,7 +74,7 @@ jobs:
             - *attach_workspace
             - run:
                 name: Test
-                command: npx nyc mocha
+                command: npx scri test
             - store_artifacts:
                 path: coverage/lcov.info
                 when: always

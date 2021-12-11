@@ -1,6 +1,6 @@
 import chalk from "ansi-colors";
 import moment, { Moment } from "moment";
-import { BuildTask, BuildTaskWhen } from "./buildTask";
+import { BuildTask, BuildTaskWhen, DoesDelegate } from "./buildTask";
 
 export class BuildTasks {
     private tasks: { [name: string]: BuildTask; } = {};
@@ -22,7 +22,7 @@ export class BuildTasks {
             task.hasRun = true;
 
             const dependencySuccess = await this.runTasks(task.dependencies);
-            let shouldRun = false;
+            let shouldRun: boolean;
             switch (task.whenReference) {
                 case BuildTaskWhen.Always:
                     shouldRun = true;
@@ -41,7 +41,7 @@ export class BuildTasks {
                 if (task.doesReference) {
                     const start = moment();
                     try {
-                        console.info(`${this.writeTime(start)} Starting '${chalk.cyan(task.name)}'...`);
+                        console.info(`${BuildTasks.writeTime(start)} Starting '${chalk.cyan(task.name)}'...`);
                         task.result = await task.doesReference();
                     } catch (error) {
                         task.error = error;
@@ -56,7 +56,7 @@ export class BuildTasks {
 
                     const end = moment();
                     const elapsed = end.diff(start);
-                    let endLog = this.writeTime(end);
+                    let endLog = BuildTasks.writeTime(end);
                     if (!task.error) {
                         endLog += ` Finished '${chalk.cyan(task.name)}' `;
                     } else {
@@ -65,7 +65,7 @@ export class BuildTasks {
                         }
                         endLog += ` '${chalk.cyan(task.name)}' ${chalk.red("errored after ")}`;
                     }
-                    endLog += this.writeElapsed(elapsed);
+                    endLog += BuildTasks.writeElapsed(elapsed);
                     console.info(endLog);
                 }
 
@@ -105,30 +105,31 @@ export class BuildTasks {
     /**
      * Creates a runnable task.
      * @param taskName The name of the task.
+     * @param does Sets what the task does.
      */
-    public task(taskName: string): BuildTask {
+    public task(taskName: string, does?: DoesDelegate): BuildTask {
         const taskIndex = taskName.toLowerCase();
         let task = this.tasks[taskIndex];
         if (!task) {
-            task = new BuildTask(taskName);
+            task = new BuildTask(taskName, does);
             this.tasks[taskIndex] = task;
         }
         return task;
     }
 
-    private writeTime(time: Moment): string {
-        return `[${chalk.grey(this.formatTime(time))}]`;
+    private static writeTime(time: Moment): string {
+        return `[${chalk.grey(BuildTasks.formatTime(time))}]`;
     }
 
-    private formatTime(time: Moment): string {
+    private static formatTime(time: Moment): string {
         return time.format("HH:mm:ss");
     }
 
-    private writeElapsed(elapsed: number): string {
-        return chalk.magenta(this.formatElapsed(elapsed));
+    private static writeElapsed(elapsed: number): string {
+        return chalk.magenta(BuildTasks.formatElapsed(elapsed));
     }
 
-    private formatElapsed(elapsed: number): string {
+    private static formatElapsed(elapsed: number): string {
         if (elapsed > 1100) {
             if (elapsed / 1000 > 66) {
                 return `${Math.round(elapsed / 50 / 3) / 100} m`;
@@ -140,4 +141,5 @@ export class BuildTasks {
         }
     }
 }
+
 export const scri = new BuildTasks();
