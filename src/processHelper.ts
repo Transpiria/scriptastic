@@ -11,6 +11,10 @@ export class ProcessHelper {
         return execSync(command, options);
     }
 
+    public static exec(command: string, options?: SpawnOptions): Promise<ChildProcess> {
+        return this.execute(command, options);
+    }
+
     public static execute(command: string, options?: SpawnOptions): Promise<ChildProcess> {
         const commandOptions = options ?? {};
         commandOptions.stdio = "inherit";
