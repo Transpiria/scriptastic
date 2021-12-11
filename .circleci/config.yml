@@ -67,7 +67,7 @@ jobs:
             - attach_workspace_step
             - run:
                 name: Test
-                command: npx nyc -- mocha --require ts-node/register "test/**/*.spec.*"
+                command: npx nyc mocha
 
     publish:
         executor: node
