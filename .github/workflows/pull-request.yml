@@ -13,6 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: npm
+    
       - name: Install dependencies
         run: npm install
 
@@ -20,9 +25,9 @@ jobs:
         run: npx scri build
 
       - name: Persist workspace
-        uses: actions/upload-artifact@v2
+        uses: actions/cache@v2
         with:
-          name: workspace
+          key: workspace
           path: .
     
   lint:
@@ -30,9 +35,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Attach workspace
-        uses: actions/download-artifact@v2
+        uses: actions/cache@v2
         with:
-          name: workspace
+          key: workspace
           path: .
 
       - name: Test
@@ -43,9 +48,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Attach workspace
-        uses: actions/download-artifact@v2
+        uses: actions/cache@v2
         with:
-          name: workspace
+          key: workspace
           path: .
 
       - name: Test
