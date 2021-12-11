@@ -91,11 +91,6 @@ jobs:
                 command: npx scri just-pack
             - run: 
                 name: Publish package
-                command: npm adduser \<<EOF
-                    $NPM_USER
-                    $NPM_TOKEN
-                    $NPM_EMAIL
-                    EOF
-            - run: 
-                name: Publish package
-                command: npm publish scriptastic-<<pipeline.git.tag>>.tgz
+                command: |
+                    echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
+                    npm publish scriptastic-<<pipeline.git.tag>>.tgz
