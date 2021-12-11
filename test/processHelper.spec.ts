@@ -6,9 +6,9 @@ import { ProcessHelper } from "../src/processHelper";
 
 describe("The ProcessHelper class", () => {
 
-    describe("The executeSync method", () => {
+    describe("executeSync method", () => {
 
-        let execSyncMock: sinon.SinonStub<[string, cp.ExecSyncOptions?], Buffer>;
+        let execSyncMock: sinon.SinonStub<[string, cp.ExecSyncOptions?], string | Buffer>;
 
         beforeEach(() => {
             execSyncMock = sinon.stub(cp, "execSync");

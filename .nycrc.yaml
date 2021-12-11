@@ -1,0 +1,16 @@
+include:
+    - src
+exclude:
+    - dist
+    - samples
+extension:
+    - .ts
+require:
+    - ts-node/register
+reporter:
+    - text
+    - html
+    - lcov
+all: true
+sourceMap: true
+instrument: true

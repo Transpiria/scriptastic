@@ -4,7 +4,7 @@ import { ErrorHelper } from "../src/errorHelper";
 
 describe("The ErrorHelper class", () => {
 
-    describe("The prettifyError method", () => {
+    describe("prettifyError method", () => {
 
         it("should format error as a string", () => {
             // Arrange

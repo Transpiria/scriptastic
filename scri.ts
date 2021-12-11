@@ -23,7 +23,7 @@ scri.task("clean")
 
 scri.task("lint")
     .does(() => {
-        ph.executeSync("tslint --project .");
+        ph.executeSync("eslint");
     });
 
 scri.task("build")
@@ -36,7 +36,7 @@ scri.task("test")
     .dependsOn("clean:nyc")
     .dependsOn("clean:coverage")
     .does(() => {
-        ph.executeSync("nyc --all mocha", {
+        ph.executeSync("nyc mocha", {
             env: {
                 TS_NODE_PROJECT: "test/tsconfig.json",
             },

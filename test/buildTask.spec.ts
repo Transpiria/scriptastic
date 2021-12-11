@@ -4,7 +4,7 @@ import { BuildTask, BuildTaskWhen } from "../src/buildTask";
 
 describe("The BuildTask class", () => {
 
-    describe("The constructor", () => {
+    describe("constructor", () => {
 
         it("should set the name property", () => {
             // Arrange
@@ -39,7 +39,7 @@ describe("The BuildTask class", () => {
         });
     });
 
-    describe("The when method", () => {
+    describe("when method", () => {
 
         [
             { title: "BuildTaskWhen", when: BuildTaskWhen.Always },
@@ -59,7 +59,7 @@ describe("The BuildTask class", () => {
 
     });
 
-    describe("The does method", () => {
+    describe("does method", () => {
 
         it(`should set the doesReference property`, () => {
             // Arrange
@@ -75,7 +75,7 @@ describe("The BuildTask class", () => {
 
     });
 
-    describe("The onError method", () => {
+    describe("onError method", () => {
 
         it(`should set the errorReference property`, () => {
             // Arrange
@@ -91,7 +91,7 @@ describe("The BuildTask class", () => {
 
     });
 
-    describe("The dependsOn method", () => {
+    describe("dependsOn method", () => {
 
         [
             { title: "string", dependency: "dependency", expectedDependency: "dependency" },
@@ -138,7 +138,7 @@ describe("The BuildTask class", () => {
 
     });
 
-    describe("The runs method", () => {
+    describe("runs method", () => {
 
         [
             { title: "string", run: "run", expectedrun: "run" },
