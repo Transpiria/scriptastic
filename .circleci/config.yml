@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+    node: circleci/node@4
+
 workflows:
     version: 2
     workflow:
@@ -11,57 +14,46 @@ workflows:
             - test:
                 requires:
                     - build
-            - package:
+            - publish:
                 requires:
                     - build
                     - lint
                     - test
                 filters:
                     branches:
-                        only: master
-
-            # - publish:
-            #     requires:
-            #         - package
+                        ignore: /.*/
+                    tags: 
+                        only: /^\d+\.\d+\.\d+(-.*)?/
 
 executors:
     node:
         docker:
-            - image: node
-        working_directory: ~/app
+            - image: node:14
 
-attach_workspace: &attach_workspace
-    attach_workspace:
-        at: ~/
+commands:
+    attach_workspace_step:
+        steps:
+            - attach_workspace:
+                at: ~/
 
 jobs:
     build:
         executor: node
         steps:
             - checkout
-            - restore_cache:
-                keys:
-                    - dependencies-{{ checksum "package-lock.json" }}
-                    - dependencies-
-            - run:
-                name: Install packages
-                command: npm install
-            - save_cache:
-                paths:
-                    - node_modules
-                key: dependencies-{{ checksum "package-lock.json" }}
+            - node/install-packages
             - run:
                 name: Build
                 command: npx scri build
             - persist_to_workspace:
                 root: ~/
                 paths:
-                    - app
+                    - project
 
     lint:
         executor: node
         steps:
-            - *attach_workspace
+            - attach_workspace_step
             - run:
                 name: Lint
                 command: npx scri lint
@@ -69,22 +61,37 @@ jobs:
     test:
         executor: node
         environment:
-            TS_NODE_PROJECT: "test/tsconfig.json"
+            TS_NODE_PROJECT: test/tsconfig.json
         steps:
-            - *attach_workspace
+            - attach_workspace_step
             - run:
                 name: Test
-                command: npx scri test
-            - store_artifacts:
-                path: coverage/lcov.info
-                when: always
+                command: npx nyc -- mocha --require ts-node/register --recursive test/**/*.spec.*
 
-    package:
+    publish:
         executor: node
         steps:
-            - *attach_workspace
+            - attach_workspace_step
             - run:
-                name: Package extension
+                name: Install dependencies
+                command: |
+                    curl -sL -o /usr/local/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+                    chmod +x /usr/local/bin/jq
+            - run:
+                name: Set version
+                command: |
+                    jq ".version = \"<<pipeline.git.tag>>\"" package.json > package.json.temp
+                    mv package.json.temp package.json
+            - run:
+                name: Package
                 command: npx scri just-pack
-            - store_artifacts:
-                path: "*.tgz"
+            - run: 
+                name: Publish package
+                command: npm adduser \<<EOF
+                    $NPM_USER
+                    $NPM_TOKEN
+                    $NPM_EMAIL
+                    EOF
+            - run: 
+                name: Publish package
+                command: npm publish scriptastic-<<pipeline.git.tag>>.tgz

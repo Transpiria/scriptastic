@@ -1,6 +1,6 @@
 {
     "name": "scriptastic",
-    "version": "1.0.6",
+    "version": "1.0.0",
     "description": "Simple task runner.",
     "repository": {
         "type": "git",
@@ -19,6 +19,7 @@
     "scripts": {
         "clean": "scri clean",
         "build": "scri build",
+        "lint": "scri lint",
         "test": "scri test",
         "pack": "scri pack"
     },
