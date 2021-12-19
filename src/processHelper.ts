@@ -19,6 +19,9 @@ export class ProcessHelper {
         const commandOptions = options ?? {};
         commandOptions.stdio = "inherit";
         commandOptions.shell = true;
+        if (commandOptions.env != null) {
+            Object.assign(process.env, commandOptions.env);
+        }
 
         return new Promise<ChildProcess>((resolve, reject) => {
             const process = spawn(command, [], commandOptions);
