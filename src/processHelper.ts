@@ -20,7 +20,7 @@ export class ProcessHelper {
         commandOptions.stdio = "inherit";
         commandOptions.shell = true;
         if (commandOptions.env != null) {
-            Object.assign(process.env, commandOptions.env);
+            commandOptions.env = Object.assign({}, process.env, commandOptions.env);
         }
 
         return new Promise<ChildProcess>((resolve, reject) => {
